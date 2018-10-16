@@ -16,12 +16,14 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 
+import com.mparticle.kits.core.KitIntegration;
+import com.mparticle.kits.core.ReportingMessage;
 import com.taplytics.sdk.Taplytics;
 import com.taplytics.sdk.TaplyticsHasUserOptedOutListener;
 
 import org.json.JSONObject;
 
-public class TaplyticsKit extends KitIntegration
+public class TaplyticsKit extends AbstractKitIntegration
         implements
         KitIntegration.AttributeListener,
         KitIntegration.EventListener,
@@ -66,13 +68,13 @@ public class TaplyticsKit extends KitIntegration
     }
 
     @Override
-    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+    public List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
         startTaplytics(settings, context);
         return null;
     }
 
     private List<ReportingMessage> createReportingMessages(String message) {
-        ReportingMessage reportingMessage = new ReportingMessage(this,
+        ReportingMessage reportingMessage = new ReportingMessageImpl(this,
                 message,
                 System.currentTimeMillis(),
                 null);
@@ -197,7 +199,7 @@ public class TaplyticsKit extends KitIntegration
             }
 
             Taplytics.logRevenue(id, revenue);
-            return Collections.singletonList(ReportingMessage.fromEvent(this, event));
+            return Collections.singletonList(ReportingMessageImpl.fromEvent(this, event));
         }
         return null;
     }
@@ -210,13 +212,13 @@ public class TaplyticsKit extends KitIntegration
     public List<ReportingMessage> logEvent(MPEvent event) {
         String eventName = event.getEventName();
         Taplytics.logEvent(eventName);
-        return Collections.singletonList(ReportingMessage.fromEvent(this, event));
+        return Collections.singletonList(ReportingMessageImpl.fromEvent(this, event));
     }
 
     @Override
     public List<ReportingMessage> logScreen(String screenName, Map<String, String> screenAttributes) {
         Taplytics.logEvent(screenName);
-        return createReportingMessages(ReportingMessage.MessageType.SCREEN_VIEW);
+        return createReportingMessages(ReportingMessageImpl.MessageType.SCREEN_VIEW);
     }
 
     /**
@@ -249,6 +251,6 @@ public class TaplyticsKit extends KitIntegration
             }
         });
 
-        return createReportingMessages(ReportingMessage.MessageType.OPT_OUT);
+        return createReportingMessages(ReportingMessageImpl.MessageType.OPT_OUT);
     }
 }
